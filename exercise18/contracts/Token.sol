@@ -5,9 +5,9 @@ contract TokenContract {
     // Public state variables
     string public name;
     string public symbol;
-    uint256 public totalSupply;
-    uint8 decimal;
+    uint8 public decimal;
     address public owner;
+    uint256 public totalSupply;
     uint256 public maxSupply;
 
     mapping(address => uint256) public balances;
@@ -51,17 +51,8 @@ contract TokenContract {
         totalSupply += amount;
     }
 
-    // Function to burn tokens
-    function burn(uint256 amount) public onlyOwner{
-    
-        require(balances[msg.sender] >= amount, "Insufficient balance");
-        // Subtract the burned tokens from the owner's balance and decrease total supply
-        balances[msg.sender] -= amount;
-        totalSupply -= amount;
-    }
-
     // transfer tokens
-    function transfer(uint256 amount, address to) public {
+    function transfer(uint256 amount, address to) public virtual{
         // Sender should have enough balance, and the receiver address should be valid
         require(balances[msg.sender] >= amount, "Insufficient balance");
         require(to != address(0), "Invalid address");

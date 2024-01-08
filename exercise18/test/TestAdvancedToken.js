@@ -14,10 +14,10 @@ describe("AdvancedToken", function () {
   let owner;
   let addr;
 
-  beforeEach(async function () {
-    advancedToken = await ethers.getContractFactory("AdvancedToken", [], {});
+  it("Should deploy the contract", async function () {
+    advancedToken = await hre.ethers.deployContract("AdvancedToken", [], {});
     await advancedToken.waitForDeployment();
-    [owner, addr] = await ethers.getSigners();
+    [owner, addr] = await hre.ethers.getSigners();
   });
 
   //Test Constructor
@@ -52,9 +52,14 @@ describe("AdvancedToken", function () {
 
   //Test Minting beyond max supply
   it("Should not mint tokens beyond max supply", async function () {
-    const tokensToMint = 1001n * (10n ** 18n);
-    await expect(advancedToken.connect(owner).mintToOwner(tokensToMint)).to.be.revertedWith("Max supply exceeding");
-    await expect(advancedToken.connect(owner).mintToUser(addr, tokensToMint)).to.be.revertedWith("Max supply exceeding");
+    const maxSupply = await advancedToken.maxSupply();
+    const totalSupply = await advancedToken.totalSupply();
+    const userBalance = await advancedToken.balances(addr);
+    const ownerBalance = await advancedToken.balances(owner);
+    // Amount to mint beyond maxSupply
+    const tokensToMint = maxSupply - totalSupply + 1n;
+    await expect(advancedToken.connect(owner).mintToOwner(tokensToMint)).to.be.revertedWith("Maximum supply reached");
+    await expect(advancedToken.connect(owner).mintToUser(addr, tokensToMint)).to.be.revertedWith("Maximum supply reached");
 
     // Check if balances remain unchanged
     expect(await advancedToken.balances(addr)).to.equal(userBalance);
@@ -87,7 +92,7 @@ describe("AdvancedToken", function () {
     const lockDuration = 10000;
 
     // Lock tokens for a specified duration
-    await advancedToken.connect(owner).lockToken(lockDuration, tokendToLock, addr);
+    await advancedToken.connect(owner).lockTokens(lockDuration, tokendToLock, addr);
     // Attempting to burn more than locked tokens should be reverted
     await expect(advancedToken.connect(addr).burn(userBalance - tokendToLock + 1n)).to.be.revertedWith("Insufficient balance");
 

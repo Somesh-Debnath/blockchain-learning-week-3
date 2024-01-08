@@ -34,7 +34,7 @@ contract AdvancedToken is TokenContract{
     }
 
     //burn tokens 
-    function burn(uint256 amount) public override {
+    function burn(uint256 amount) public {
         require(balances[msg.sender] - noOfLockedTokens(msg.sender)>= amount, "Insufficient balance");
         // Subtract the burned tokens from the owner's balance and decrease total supply
         balances[msg.sender] -= amount;
@@ -42,16 +42,15 @@ contract AdvancedToken is TokenContract{
     }
 
     //transfer tokens
-    function transfer(address to, uint256 amount) public returns (bool success){
+    function transfer(uint256 amount, address to) public override  {
         require(balances[msg.sender] - noOfLockedTokens(msg.sender)>= amount, "Insufficient balance");
         require(to != address(0), "Invalid address");
         balances[msg.sender] -= amount;
         balances[to] += amount;
-        return true;
     }
 
     //lock tokens
-    function lockTokens(address user, uint256 amount, uint256 lockTime) public onlyOwner{
+    function lockTokens(uint256 lockTime, uint256 amount, address user) public onlyOwner{
 
         require(balances[user] - noOfLockedTokens(user)>= amount, "Insufficient balance");
         require(lockTime > 0, "Invalid lock time");

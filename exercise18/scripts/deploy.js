@@ -6,13 +6,12 @@
 // global scope, and execute the script.
 const hre = require("hardhat");
 
-//deploy the AdvancedToken Contract
-
 async function main() {
-  const advancedToken = await hre.ethers.getContractFactory("AdvancedToken",[], {});
+  const advancedToken = await hre.ethers.deployContract("AdvancedToken", [], {});
+
   await advancedToken.waitForDeployment();
 
-  console.log("AdvancedToken deployed to:", advancedTokenContract.target);
+  console.log("AdvancedToken contract deployed.");
 }
 
 // We recommend this pattern to be able to use async/await everywhere
